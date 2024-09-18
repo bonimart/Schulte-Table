@@ -139,7 +139,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     // Display the game name
                     parent.spawn(
                         TextBundle::from_section(
-                            "Bevy Game Menu UI",
+                            "Schulte Table",
                             TextStyle {
                                 font_size: 67.0,
                                 color: COLOR_TEXT,

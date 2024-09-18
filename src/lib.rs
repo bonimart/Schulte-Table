@@ -4,7 +4,6 @@ use bevy::{
 };
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 
-mod splash;
 mod menu;
 mod game;
 
@@ -24,7 +23,6 @@ const TIMER_DURATION: f32 = 0.2;
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 enum GameState {
     #[default]
-    Splash,
     Menu,
     Game,
 }
@@ -47,7 +45,7 @@ fn main() {
         .insert_resource(ClearColor(COLOR_BACKGROUND))  // Background color
         .init_state::<GameState>()
         .add_systems(Startup, setup)
-        .add_plugins((splash::splash_plugin, menu::menu_plugin, game::game_plugin))
+        .add_plugins((menu::menu_plugin, game::game_plugin))
         .run();
 }
 
