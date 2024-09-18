@@ -10,6 +10,8 @@ use rand::{
     thread_rng,
 };
 
+mod splash;
+
 const WIDTH: usize = 2;
 const HEIGHT: usize = 2;
 const BUTTON_SIZE: f32 = 50.0;
@@ -39,10 +41,11 @@ struct NextExpected(u8);
 struct Score(u8);
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
-enum AppState {
+enum GameState {
     #[default]
-    Playing,
-    GameOver,
+    Splash,
+    Menu,
+    Game,
 }
 
 #[bevy_main]
@@ -64,19 +67,18 @@ fn run_game() {
                     ..default()
                 })
         ))
-        .insert_state(AppState::Playing)
         .insert_resource(ClearColor(COLOR_BACKGROUND))  // Background color
         .insert_resource(NextExpected(1))  // Track the next expected tile
         .insert_resource(Score(0))  // Track the score
+        .init_state::<GameState>()
         .add_systems(Startup, setup)
         .add_systems(Update, button_click_handler)
         .add_systems(Update, blink_system)
-        .add_systems(OnExit(AppState::Playing), game_over)
+        .add_plugins(splash::splash_plugin)
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // Camera
     commands.spawn(Camera2dBundle::default());
 
     // Generate random numbers for the grid
@@ -146,8 +148,7 @@ fn button_click_handler(
     mut commands: Commands,
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor, Entity, &TileButton), (Changed<Interaction>, With<Button>)>,
     mut next_expected: ResMut<NextExpected>,
-    mut score: ResMut<Score>,
-    mut next_state: ResMut<NextState<AppState>>,    
+    mut score: ResMut<Score>
 ) {
     for (interaction, mut color, entity, tile_button) in interaction_query.iter_mut() {
         match *interaction {
@@ -165,11 +166,6 @@ fn button_click_handler(
                 commands.entity(entity).insert(TileBlink {
                     timer: Timer::from_seconds(TIMER_DURATION, TimerMode::Once),
                 });
-
-                if **next_expected as usize > WIDTH * HEIGHT {
-                    // Game over
-                    next_state.set(AppState::GameOver);
-                }
             },
             _ => {}
         }
@@ -221,4 +217,11 @@ fn game_over(mut commands: Commands, score: Res<Score>, asset_server: Res<AssetS
         ),
         ..default()
     });
+}
+
+// Generic system that takes a component as a parameter, and will despawn all entities with that component
+fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
+    for entity in &to_despawn {
+        commands.entity(entity).despawn_recursive();
+    }
 }
