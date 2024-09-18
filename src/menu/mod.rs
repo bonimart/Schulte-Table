@@ -62,7 +62,6 @@ enum MenuButtonAction {
     SettingsWidth,
     SettingsHeight,
     BackToMainMenu,
-    BackToSettings,
     Quit,
 }
 
@@ -311,9 +310,6 @@ fn menu_action(
                 MenuButtonAction::SettingsHeight => {}
                 MenuButtonAction::SettingsWidth => {}
                 MenuButtonAction::BackToMainMenu => menu_state.set(MenuState::Main),
-                MenuButtonAction::BackToSettings => {
-                    menu_state.set(MenuState::Settings);
-                }
             }
         }
     }
