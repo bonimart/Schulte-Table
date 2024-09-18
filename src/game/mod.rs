@@ -21,8 +21,8 @@ use super::{
 
 pub fn game_plugin(app: &mut App) {
     app
-        .insert_resource(NextExpected(1))
-        .insert_resource(Score(0))
+        .init_resource::<NextExpected>()
+        .init_resource::<Score>()
         .add_systems(OnEnter(GameState::Game), game_setup)
         .add_systems(Update, (game, blink_system).run_if(in_state(GameState::Game)))
         .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>);
@@ -30,9 +30,6 @@ pub fn game_plugin(app: &mut App) {
 
 #[derive(Component)]
 struct OnGameScreen;
-
-#[derive(Resource, Deref, DerefMut)]
-struct GameTimer(Timer);
 
 #[derive(Component)]
 struct TileButton {
@@ -47,13 +44,23 @@ struct TileBlink {
 #[derive(Resource, Deref, DerefMut)]
 struct NextExpected(u8);
 
+impl Default for NextExpected {
+    fn default() -> Self {
+        NextExpected(1)
+    }
+}
+
 #[derive(Resource, Default, Deref, DerefMut)]
 struct Score(u8);
 
 fn game_setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    mut next_expected: ResMut<NextExpected>,
+    mut score: ResMut<Score>,
 ) {
+    *next_expected = NextExpected::default();
+    *score = Score::default();
     // Generate random numbers for the grid
     let mut numbers: Vec<u8> = (1u8..=(WIDTH * HEIGHT) as u8).collect();
     let mut rng = thread_rng();

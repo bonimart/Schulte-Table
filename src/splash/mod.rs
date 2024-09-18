@@ -46,8 +46,8 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 text: Text::from_section(
                     "Schulte Table",
                     TextStyle {
-                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                        font_size: 5.0*FONT_SIZE,
+                        font: asset_server.load("embedded://fonts/FiraSans-Bold.ttf"),
+                        font_size: FONT_SIZE,
                         color: COLOR_TEXT,
                     },
                 ),

@@ -166,7 +166,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             MenuButtonAction::Play,
                         ))
                         .with_children(|parent| {
-                            let icon = asset_server.load("textures/Game Icons/right.png");
+                            let icon = asset_server.load("embedded://textures/right.png");
                             parent.spawn(ImageBundle {
                                 style: button_icon_style.clone(),
                                 image: UiImage::new(icon),
@@ -187,7 +187,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             MenuButtonAction::Settings,
                         ))
                         .with_children(|parent| {
-                            let icon = asset_server.load("textures/Game Icons/wrench.png");
+                            let icon = asset_server.load("embedded://textures/wrench.png");
                             parent.spawn(ImageBundle {
                                 style: button_icon_style.clone(),
                                 image: UiImage::new(icon),
@@ -208,7 +208,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             MenuButtonAction::Quit,
                         ))
                         .with_children(|parent| {
-                            let icon = asset_server.load("textures/Game Icons/exitRight.png");
+                            let icon = asset_server.load("embedded://textures/exitRight.png");
                             parent.spawn(ImageBundle {
                                 style: button_icon_style,
                                 image: UiImage::new(icon),

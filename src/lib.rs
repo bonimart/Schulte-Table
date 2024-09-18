@@ -47,7 +47,7 @@ fn main() {
         .insert_resource(ClearColor(COLOR_BACKGROUND))  // Background color
         .init_state::<GameState>()
         .add_systems(Startup, setup)
-        .add_plugins(splash::splash_plugin, menu::menu_plugin, game::game_plugin)
+        .add_plugins((splash::splash_plugin, menu::menu_plugin, game::game_plugin))
         .run();
 }
 
