@@ -11,17 +11,3 @@ rand = "0.8.5"
 [lib]
 name = "schulte_table"
 crate-type = ["staticlib", "cdylib"]
-
-[package.metadata.android]
-package = "org.bevyengine.schulte_table"
-apk_name = "schulte_table"
-assets = "assets"
-# This strips debug symbols from the shared libraries, drastically reducing APK size. If you need them, remove the option.
-strip = "strip"
-build_targets = ["aarch64-linux-android", "armv7-linux-androideabi"]
-
-[package.metadata.android.sdk]
-target_sdk_version = 31
-
-[package.metadata.android.application]
-label = "Schulte Table"
