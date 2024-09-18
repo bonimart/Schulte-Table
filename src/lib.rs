@@ -1,8 +1,7 @@
 use bevy::{
     prelude::*,
-    input::touch::TouchPhase,
     ui::Val,
-    window::{AppLifecycle, WindowMode},
+    window::WindowMode,
 };
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use rand::{
@@ -11,6 +10,7 @@ use rand::{
 };
 
 mod splash;
+mod game;
 
 const WIDTH: usize = 2;
 const HEIGHT: usize = 2;
@@ -50,10 +50,6 @@ enum GameState {
 
 #[bevy_main]
 fn main() {
-    run_game();
-}
-
-fn run_game() {
     App::new()
         .add_plugins((
             EmbeddedAssetPlugin::default(),
@@ -81,67 +77,6 @@ fn run_game() {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle::default());
 
-    // Generate random numbers for the grid
-    let mut numbers: Vec<u8> = (1u8..=(WIDTH * HEIGHT) as u8).collect();
-    let mut rng = thread_rng();
-    numbers.shuffle(&mut rng);
-
-    // Root UI node
-    commands.spawn(NodeBundle {
-        style: Style {
-            height: Val::Percent(100.0),
-            width: Val::Percent(100.0),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..default()
-        },
-        background_color: BackgroundColor(Color::NONE),
-        ..default()
-    })
-    .with_children(|parent| {
-        // Create a grid of buttons for the Schulte table
-        parent.spawn(NodeBundle {
-            style: Style {
-                height: Val::Px((BUTTON_SIZE + BUTTON_PADDING * 2.0) * HEIGHT as f32), 
-                width: Val::Px((BUTTON_SIZE + BUTTON_PADDING * 2.0) * WIDTH as f32),
-                flex_wrap: FlexWrap::Wrap,
-                justify_content: JustifyContent::SpaceAround,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            ..default()
-        })
-        .with_children(|grid| {
-            for &number in numbers.iter() {
-                grid.spawn(ButtonBundle {
-                    style: Style {
-                        height: Val::Px(BUTTON_SIZE),
-                        width: Val::Px(BUTTON_SIZE),
-                        margin: UiRect::all(Val::Px(BUTTON_PADDING)),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    background_color: BackgroundColor(COLOR_DEFAULT).into(),
-                    ..default()
-                })
-                .insert(TileButton { number })
-                    .with_children(|button| {
-                        button.spawn(TextBundle {
-                            text: Text::from_section(
-                                      number.to_string(),
-                                      TextStyle {
-                                          font: asset_server.load("embedded://fonts/FiraSans-Bold.ttf"),
-                                          font_size: FONT_SIZE,
-                                          color: COLOR_TEXT,
-                                      },
-                                  ),
-                                  ..default()
-                        });
-                    });
-            }
-        });
-    });
 }
 
 fn button_click_handler(
