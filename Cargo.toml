@@ -1,5 +1,5 @@
 [package]
-name = "schulte_table_console"
+name = "schulte_table"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,7 +9,7 @@ bevy_embedded_assets = "0.11.0"
 rand = "0.8.5"
 
 [lib]
-name = "schulte_table_console"
+name = "schulte_table"
 crate-type = ["staticlib", "cdylib"]
 
 [package.metadata.android]
