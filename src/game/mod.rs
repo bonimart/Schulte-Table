@@ -24,7 +24,7 @@ pub fn game_plugin(app: &mut App) {
         .insert_resource(NextExpected(1))
         .insert_resource(Score(0))
         .add_systems(OnEnter(GameState::Game), game_setup)
-        .add_systems(Update, game.run_if(in_state(GameState::Game)))
+        .add_systems(Update, (game, blink_system).run_if(in_state(GameState::Game)))
         .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>);
 }
 
@@ -141,8 +141,6 @@ fn game(
                 } else {
                     COLOR_INCORRECT
                 };
-
-                // Change the color and add the TileBlink component
                 *color = BackgroundColor(new_color.into());
                 commands.entity(entity).insert(TileBlink {
                     timer: Timer::from_seconds(TIMER_DURATION, TimerMode::Once),
@@ -163,8 +161,6 @@ fn blink_system(
 ) {
     for (entity, mut blink, mut color) in query.iter_mut() {
         blink.timer.tick(time.delta());
-
-        // Reset the color after 0.5s and remove the TileBlink component
         if blink.timer.finished() {
             *color = BackgroundColor(COLOR_DEFAULT.into());
             commands.entity(entity).remove::<TileBlink>();
