@@ -21,6 +21,7 @@ pub struct GameConfiguraiton {
     pub color_background: Color,
     pub timer_duration: f32,
     pub incorrect_penalty: u8,
+    pub score_file_path: String,
 }
 
 impl Default for GameConfiguraiton {
@@ -38,6 +39,7 @@ impl Default for GameConfiguraiton {
             color_background: Color::srgb(0.9, 0.9, 0.9),
             timer_duration: 0.2,
             incorrect_penalty: 2,
+            score_file_path: "score/score.txt".to_string(),
         }
     }
 }

@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
     app::AppExit,
 };
+use std::fs;
 
 use super::{
     despawn_screen,
@@ -16,6 +17,8 @@ pub fn menu_plugin(app: &mut App) {
         // Systems to handle the main menu screen
         .add_systems(OnEnter(MenuState::Main), main_menu_setup)
         .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
+        .add_systems(OnEnter(MenuState::Scoreboard), scoreboard_setup)
+        .add_systems(OnExit(MenuState::Scoreboard), despawn_screen::<OnScoreboardScreen>)
         // Systems to handle the settings menu screen
         .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
         .add_systems(
@@ -34,6 +37,7 @@ pub fn menu_plugin(app: &mut App) {
 enum MenuState {
     Main,
     Settings,
+    Scoreboard,
     #[default]
     Disabled,
 }
@@ -43,6 +47,9 @@ struct OnMainMenuScreen;
 
 #[derive(Component)]
 struct OnSettingsMenuScreen;
+
+#[derive(Component)]
+struct OnScoreboardScreen;
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
@@ -60,6 +67,7 @@ enum MenuButtonAction {
     Settings,
     SettingsWidth,
     SettingsHeight,
+    Scoreboard,
     BackToMainMenu,
     Quit,
 }
@@ -182,6 +190,21 @@ fn main_menu_setup(
                                 background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
+                            MenuButtonAction::Scoreboard,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                "Scoreboard",
+                                button_text_style.clone(),
+                            ));
+                        });
+                    parent
+                        .spawn((
+                            ButtonBundle {
+                                style: button_style.clone(),
+                                background_color: NORMAL_BUTTON.into(),
+                                ..default()
+                            },
                             MenuButtonAction::Settings,
                         ))
                         .with_children(|parent| {
@@ -214,6 +237,89 @@ fn main_menu_setup(
                             });
                             parent.spawn(TextBundle::from_section("Quit", button_text_style));
                         });
+                });
+        });
+}
+
+fn scoreboard_setup(
+    mut commands: Commands,
+    config: Res<GameConfiguraiton>,
+) {
+    let button_style = Style {
+        width: Val::Px(200.0),
+        height: Val::Px(65.0),
+        margin: UiRect::all(Val::Px(20.0)),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    };
+    let button_text_style = TextStyle {
+        font_size: 33.0,
+        color: config.color_text,
+        ..default()
+    };
+    let scores = fs::read_to_string(&config.score_file_path).unwrap_or_default();
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    ..default()
+                },
+                ..default()
+            },
+            OnScoreboardScreen,
+        ))
+        .with_children(|parent| {
+            parent.spawn(
+                TextBundle::from_section(
+                    scores,
+                    TextStyle {
+                        font_size: 67.0,
+                        color: config.color_text,
+                        ..default()
+                    },
+                )
+                .with_style(Style {
+                    margin: UiRect::all(Val::Px(50.0)),
+                    ..default()
+                }),
+            );
+        })
+        .with_children(|parent| {
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    background_color: config.color_background.into(),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    for (action, text) in [
+                        (MenuButtonAction::BackToMainMenu, "Back"),
+                    ] {
+                        parent
+                            .spawn((
+                                ButtonBundle {
+                                    style: button_style.clone(),
+                                    background_color: NORMAL_BUTTON.into(),
+                                    ..default()
+                                },
+                                action,
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn(TextBundle::from_section(
+                                    text,
+                                    button_text_style.clone(),
+                                ));
+                            });
+                    }
                 });
         });
 }
@@ -306,6 +412,9 @@ fn menu_action(
                 MenuButtonAction::Play => {
                     game_state.set(GameState::Game);
                     menu_state.set(MenuState::Disabled);
+                }
+                MenuButtonAction::Scoreboard => {
+                    menu_state.set(MenuState::Scoreboard);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),
                 // TODO add settings actions

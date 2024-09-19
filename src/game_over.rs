@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 use super::game::{Penalty, GameDuration};
+use std::fs::File;
+use std::fs;
+use std::path;
+use std::io::Write;
 
 use super::{
     despawn_screen,
@@ -27,7 +31,19 @@ fn game_over_setup(
     config: Res<GameConfiguraiton>,
 ) {
     let time = game_duration.time.elapsed().as_millis() as f32 / 1000.0 + **penalty as f32;
-    let game_over_message = format!("Time: {:.2} s", time);
+    let time_str = format!("{:.2} s", time);
+    let game_over_message = format!("Time: {}", time_str);
+
+    let score_dir = path::Path::new(&config.score_file_path)
+        .parent()
+        .expect("Unable to resolve score directory");
+    fs::create_dir_all(score_dir)
+        .expect("Unable to create score directory");
+    let mut score_file = File::options().append(true).create(true).open(&config.score_file_path)
+        .expect("Unable to open/create score file");
+    write!(score_file, "{}\n", time_str)
+        .expect("Unable to write score file");
+
     commands
         .spawn((
             NodeBundle {
