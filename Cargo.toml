@@ -8,7 +8,11 @@ bevy = "0.14.2"
 rand = "0.8.5"
 
 [lib]
-crate-type = ["staticlib", "cdylib", "rlib"]
+crate-type = [
+    "staticlib",
+    "cdylib",
+    "rlib", # needed for running lib.rs code in main.rs
+]
 
 [package.metadata.android]
 package = "org.example.schulte_table"
