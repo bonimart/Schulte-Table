@@ -157,7 +157,7 @@ fn game(
         }
     }
     if **next_expected as usize > WIDTH * HEIGHT {
-        game_state.set(GameState::Menu);
+        game_state.set(GameState::GameOver);
     }
 }
 

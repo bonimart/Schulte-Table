@@ -6,6 +6,7 @@ use bevy_embedded_assets::EmbeddedAssetPlugin;
 
 mod menu;
 mod game;
+mod game_over;
 
 const WIDTH: usize = 2;
 const HEIGHT: usize = 2;
@@ -25,6 +26,7 @@ enum GameState {
     #[default]
     Menu,
     Game,
+    GameOver,
 }
 
 #[bevy_main]
@@ -45,7 +47,7 @@ fn main() {
         .insert_resource(ClearColor(COLOR_BACKGROUND))  // Background color
         .init_state::<GameState>()
         .add_systems(Startup, setup)
-        .add_plugins((menu::menu_plugin, game::game_plugin))
+        .add_plugins((menu::menu_plugin, game::game_plugin, game_over::game_over_plugin))
         .run();
 }
 
