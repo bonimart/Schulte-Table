@@ -154,10 +154,6 @@ fn main_menu_setup(
                         }),
                     );
 
-                    // Display three buttons for each action available from the main menu:
-                    // - new game
-                    // - settings
-                    // - quit
                     parent
                         .spawn((
                             ButtonBundle {
@@ -168,7 +164,7 @@ fn main_menu_setup(
                             MenuButtonAction::Play,
                         ))
                         .with_children(|parent| {
-                            let icon = asset_server.load("embedded://textures/right.png");
+                            let icon = asset_server.load("textures/right.png");
                             parent.spawn(ImageBundle {
                                 style: button_icon_style.clone(),
                                 image: UiImage::new(icon),
@@ -189,7 +185,7 @@ fn main_menu_setup(
                             MenuButtonAction::Settings,
                         ))
                         .with_children(|parent| {
-                            let icon = asset_server.load("embedded://textures/wrench.png");
+                            let icon = asset_server.load("textures/wrench.png");
                             parent.spawn(ImageBundle {
                                 style: button_icon_style.clone(),
                                 image: UiImage::new(icon),
@@ -210,7 +206,7 @@ fn main_menu_setup(
                             MenuButtonAction::Quit,
                         ))
                         .with_children(|parent| {
-                            let icon = asset_server.load("embedded://textures/exitRight.png");
+                            let icon = asset_server.load("textures/exitRight.png");
                             parent.spawn(ImageBundle {
                                 style: button_icon_style,
                                 image: UiImage::new(icon),

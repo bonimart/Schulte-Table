@@ -2,7 +2,6 @@ use bevy::{
     prelude::*,
     window::WindowMode,
 };
-use bevy_embedded_assets::EmbeddedAssetPlugin;
 
 mod menu;
 mod game;
@@ -55,7 +54,6 @@ enum GameState {
 fn main() {
     App::new()
         .add_plugins((
-            EmbeddedAssetPlugin::default(),
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
