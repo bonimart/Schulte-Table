@@ -3,10 +3,7 @@ use bevy::{
     window::WindowMode,
 };
 use bevy_embedded_assets::EmbeddedAssetPlugin;
-use schulte_table::{
-    GamePlugin,
-    GameConfiguraiton,
-};
+use schulte_table::GamePlugin;
 
 fn main() {
     App::new()
