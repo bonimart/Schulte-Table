@@ -4,7 +4,7 @@ use super::game::{Penalty, GameDuration};
 use super::{
     despawn_screen,
     GameState,
-    COLOR_TEXT,
+    GameConfiguraiton,
 };
 
 pub fn game_over_plugin(app: &mut App) {
@@ -24,6 +24,7 @@ fn game_over_setup(
     mut commands: Commands,
     penalty: Res<Penalty>,
     game_duration: Res<GameDuration>,
+    config: Res<GameConfiguraiton>,
 ) {
     let time = game_duration.time.elapsed().as_millis() as f32 / 1000.0 + **penalty as f32;
     let game_over_message = format!("Time: {:.2} s", time);
@@ -47,7 +48,7 @@ fn game_over_setup(
                     game_over_message,
                     TextStyle {
                         font_size: 67.0,
-                        color: COLOR_TEXT,
+                        color: config.color_text,
                         ..default()
                     },
                 )

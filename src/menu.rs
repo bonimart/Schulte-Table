@@ -6,8 +6,7 @@ use bevy::{
 use super::{
     despawn_screen,
     GameState,
-    COLOR_TEXT,
-    COLOR_BACKGROUND,
+    GameConfiguraiton,
 };
 
 pub fn menu_plugin(app: &mut App) {
@@ -85,7 +84,11 @@ fn menu_setup(mut menu_state: ResMut<NextState<MenuState>>) {
     menu_state.set(MenuState::Main);
 }
 
-fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn main_menu_setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    config: Res<GameConfiguraiton>,
+) {
     // Common style for all buttons on the screen
     let button_style = Style {
         width: Val::Px(300.0),
@@ -105,7 +108,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     };
     let button_text_style = TextStyle {
         font_size: 33.0,
-        color: COLOR_TEXT,
+        color: config.color_text,
         ..default()
     };
 
@@ -131,7 +134,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    background_color: COLOR_BACKGROUND.into(),
+                    background_color: config.color_background.into(),
                     ..default()
                 })
                 .with_children(|parent| {
@@ -141,7 +144,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             "Schulte Table",
                             TextStyle {
                                 font_size: 67.0,
-                                color: COLOR_TEXT,
+                                color: config.color_text,
                                 ..default()
                             },
                         )
@@ -219,7 +222,10 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-fn settings_menu_setup(mut commands: Commands) {
+fn settings_menu_setup(
+    mut commands: Commands,
+    config: Res<GameConfiguraiton>,
+) {
     let button_style = Style {
         width: Val::Px(200.0),
         height: Val::Px(65.0),
@@ -231,7 +237,7 @@ fn settings_menu_setup(mut commands: Commands) {
 
     let button_text_style = TextStyle {
         font_size: 33.0,
-        color: COLOR_TEXT,
+        color: config.color_text,
         ..default()
     };
 
@@ -257,7 +263,7 @@ fn settings_menu_setup(mut commands: Commands) {
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    background_color: COLOR_BACKGROUND.into(),
+                    background_color: config.color_background.into(),
                     ..default()
                 })
                 .with_children(|parent| {

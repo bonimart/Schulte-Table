@@ -9,8 +9,7 @@ bevy_embedded_assets = "0.11.0"
 rand = "0.8.5"
 
 [lib]
-name = "schulte_table"
-crate-type = ["staticlib", "cdylib"]
+crate-type = ["staticlib", "cdylib", "rlib"]
 
 [package.metadata.android]
 package = "org.example.schulte_table"

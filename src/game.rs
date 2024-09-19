@@ -10,17 +10,7 @@ use rand::{
 use super::{
     despawn_screen,
     GameState,
-    FONT_SIZE,
-    COLOR_TEXT,
-    WIDTH,
-    HEIGHT,
-    BUTTON_SIZE,
-    BUTTON_PADDING,
-    COLOR_DEFAULT,
-    COLOR_CORRECT,
-    COLOR_INCORRECT,
-    TIMER_DURATION,
-    INCORRECT_PENALTY,
+    GameConfiguraiton,
 };
 
 pub fn game_plugin(app: &mut App) {
@@ -67,11 +57,12 @@ fn game_setup(
     mut commands: Commands,
     mut next_expected: ResMut<NextExpected>,
     mut penalty: ResMut<Penalty>,
+    config: Res<GameConfiguraiton>,
 ) {
     *next_expected = NextExpected::default();
     *penalty = Penalty::default();
     // Generate random numbers for the grid
-    let mut numbers: Vec<u8> = (1u8..=(WIDTH * HEIGHT) as u8).collect();
+    let mut numbers: Vec<u8> = (1u8..=(config.width * config.height) as u8).collect();
     let mut rng = thread_rng();
     numbers.shuffle(&mut rng);
 
@@ -97,8 +88,8 @@ fn game_setup(
                 spawn(
                     NodeBundle {
                         style: Style {
-                            height: Val::Px((BUTTON_SIZE + BUTTON_PADDING * 2.0) * HEIGHT as f32), 
-                            width: Val::Px((BUTTON_SIZE + BUTTON_PADDING * 2.0) * WIDTH as f32),
+                            height: Val::Px((config.button_size + config.button_padding * 2.0) * config.height as f32), 
+                            width: Val::Px((config.button_size + config.button_padding * 2.0) * config.width as f32),
                             flex_wrap: FlexWrap::Wrap,
                             justify_content: JustifyContent::SpaceAround,
                             align_items: AlignItems::Center,
@@ -111,14 +102,14 @@ fn game_setup(
                     for &number in numbers.iter() {
                         grid.spawn(ButtonBundle {
                             style: Style {
-                                height: Val::Px(BUTTON_SIZE),
-                                width: Val::Px(BUTTON_SIZE),
-                                margin: UiRect::all(Val::Px(BUTTON_PADDING)),
+                                height: Val::Px(config.button_size),
+                                width: Val::Px(config.button_size),
+                                margin: UiRect::all(Val::Px(config.button_padding)),
                                 justify_content: JustifyContent::Center,
                                 align_items: AlignItems::Center,
                                 ..default()
                             },
-                            background_color: BackgroundColor(COLOR_DEFAULT).into(),
+                            background_color: BackgroundColor(config.color_default).into(),
                             ..default()
                         })
                         .insert(TileButton { number })
@@ -127,8 +118,8 @@ fn game_setup(
                                     text: Text::from_section(
                                               number.to_string(),
                                               TextStyle {
-                                                  font_size: FONT_SIZE,
-                                                  color: COLOR_TEXT,
+                                                  font_size: config.font_size,
+                                                  color: config.color_text,
                                                   ..default()
                                               },
                                           ),
@@ -148,20 +139,21 @@ fn click_handler(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor, Entity, &TileButton), (Changed<Interaction>, With<Button>)>,
     mut next_expected: ResMut<NextExpected>,
     mut penalty: ResMut<Penalty>,
+    config: Res<GameConfiguraiton>,
 ) {
     for (interaction, mut color, entity, tile_button) in interaction_query.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
                 let new_color = if tile_button.number == **next_expected {
                     **next_expected += 1;
-                    COLOR_CORRECT
+                    config.color_correct
                 } else {
-                    **penalty += INCORRECT_PENALTY;
-                    COLOR_INCORRECT
+                    **penalty += config.incorrect_penalty;
+                    config.color_incorrect
                 };
                 *color = BackgroundColor(new_color.into());
                 commands.entity(entity).insert(TileBlink {
-                    timer: Timer::from_seconds(TIMER_DURATION, TimerMode::Once),
+                    timer: Timer::from_seconds(config.timer_duration, TimerMode::Once),
                 });
             },
             _ => {}
@@ -173,11 +165,12 @@ fn blink_system(
     time: Res<Time>,
     mut commands: Commands,
     mut query: Query<(Entity, &mut TileBlink, &mut BackgroundColor)>,
+    config: Res<GameConfiguraiton>,
 ) {
     for (entity, mut blink, mut color) in query.iter_mut() {
         blink.timer.tick(time.delta());
         if blink.timer.finished() {
-            *color = BackgroundColor(COLOR_DEFAULT.into());
+            *color = BackgroundColor(config.color_default.into());
             commands.entity(entity).remove::<TileBlink>();
         }
     }
@@ -187,8 +180,9 @@ fn check_game_over(
     next_expected: Res<NextExpected>,
     mut game_duration: ResMut<GameDuration>,
     mut game_state: ResMut<NextState<GameState>>,
+    config: Res<GameConfiguraiton>,
 ) {
-    if **next_expected as usize > WIDTH * HEIGHT {
+    if **next_expected as usize > config.width * config.height {
         game_duration.time.pause();
         game_state.set(GameState::GameOver);
     }
