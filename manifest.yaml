@@ -1,7 +1,0 @@
-android:
-  # not supperted in 0.2.0
-  # assets:
-  #   - "assets"
-  manifest:
-    application:
-      label: "Schulte Table"
