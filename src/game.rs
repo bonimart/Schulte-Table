@@ -55,7 +55,6 @@ pub struct Score(u8);
 
 fn game_setup(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut next_expected: ResMut<NextExpected>,
     mut score: ResMut<Score>,
 ) {
@@ -118,9 +117,9 @@ fn game_setup(
                                     text: Text::from_section(
                                               number.to_string(),
                                               TextStyle {
-                                                  font: asset_server.load("embedded://fonts/FiraSans-Bold.ttf"),
                                                   font_size: FONT_SIZE,
                                                   color: COLOR_TEXT,
+                                                  ..default()
                                               },
                                           ),
                                           ..default()
