@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    time::Stopwatch,
+};
 use rand::{
     seq::SliceRandom,
     thread_rng,
@@ -17,14 +20,16 @@ use super::{
     COLOR_CORRECT,
     COLOR_INCORRECT,
     TIMER_DURATION,
+    INCORRECT_PENALTY,
 };
 
 pub fn game_plugin(app: &mut App) {
     app
         .init_resource::<NextExpected>()
-        .init_resource::<Score>()
+        .init_resource::<Penalty>()
         .add_systems(OnEnter(GameState::Game), game_setup)
-        .add_systems(Update, (game, blink_system).run_if(in_state(GameState::Game)))
+        .add_systems(Update, (click_handler, blink_system, check_game_over, update_timer)
+            .run_if(in_state(GameState::Game)))
         .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>);
 }
 
@@ -51,15 +56,20 @@ impl Default for NextExpected {
 }
 
 #[derive(Resource, Default, Deref, DerefMut)]
-pub struct Score(u8);
+pub struct Penalty(u8);
+
+#[derive(Resource, Deref, DerefMut)]
+pub struct GameDuration {
+    pub time: Stopwatch
+}
 
 fn game_setup(
     mut commands: Commands,
     mut next_expected: ResMut<NextExpected>,
-    mut score: ResMut<Score>,
+    mut penalty: ResMut<Penalty>,
 ) {
     *next_expected = NextExpected::default();
-    *score = Score::default();
+    *penalty = Penalty::default();
     // Generate random numbers for the grid
     let mut numbers: Vec<u8> = (1u8..=(WIDTH * HEIGHT) as u8).collect();
     let mut rng = thread_rng();
@@ -128,23 +138,25 @@ fn game_setup(
                     }
                 });
         });
+    commands.insert_resource(GameDuration {
+        time: Stopwatch::new(),
+    });
 }
 
-fn game(
+fn click_handler(
     mut commands: Commands,
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor, Entity, &TileButton), (Changed<Interaction>, With<Button>)>,
     mut next_expected: ResMut<NextExpected>,
-    mut score: ResMut<Score>,
-    mut game_state: ResMut<NextState<GameState>>,
+    mut penalty: ResMut<Penalty>,
 ) {
     for (interaction, mut color, entity, tile_button) in interaction_query.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
                 let new_color = if tile_button.number == **next_expected {
                     **next_expected += 1;
-                    **score += 1;
                     COLOR_CORRECT
                 } else {
+                    **penalty += INCORRECT_PENALTY;
                     COLOR_INCORRECT
                 };
                 *color = BackgroundColor(new_color.into());
@@ -154,9 +166,6 @@ fn game(
             },
             _ => {}
         }
-    }
-    if **next_expected as usize > WIDTH * HEIGHT {
-        game_state.set(GameState::GameOver);
     }
 }
 
@@ -172,4 +181,22 @@ fn blink_system(
             commands.entity(entity).remove::<TileBlink>();
         }
     }
+}
+
+fn check_game_over(
+    next_expected: Res<NextExpected>,
+    mut game_duration: ResMut<GameDuration>,
+    mut game_state: ResMut<NextState<GameState>>,
+) {
+    if **next_expected as usize > WIDTH * HEIGHT {
+        game_duration.time.pause();
+        game_state.set(GameState::GameOver);
+    }
+}
+
+fn update_timer(
+    mut game_duration: ResMut<GameDuration>,
+    time: Res<Time>,
+) {
+    game_duration.time.tick(time.delta());
 }

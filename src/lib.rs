@@ -19,6 +19,7 @@ const COLOR_DEFAULT: Color = Color::srgb(0.5, 0.5, 0.5);
 const COLOR_TEXT: Color = Color::WHITE;
 const COLOR_BACKGROUND: Color = Color::srgb(0.9, 0.9, 0.9);
 const TIMER_DURATION: f32 = 0.2;
+const INCORRECT_PENALTY: u8 = 2;
 
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]

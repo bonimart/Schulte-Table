@@ -1,12 +1,11 @@
 use bevy::prelude::*;
-use super::game::Score;
+use super::game::{Penalty, GameDuration};
 
 use super::{
     despawn_screen,
     GameState,
     COLOR_TEXT,
 };
-
 
 pub fn game_over_plugin(app: &mut App) {
     app
@@ -21,8 +20,13 @@ struct OnGameOverScreen;
 #[derive(Resource, Deref, DerefMut)]
 struct GameOverTimer(Timer);
 
-fn game_over_setup(mut commands: Commands, score: Res<Score>) {
-    let game_over_message = format!("Game Over, Score: {}", score.to_string());
+fn game_over_setup(
+    mut commands: Commands,
+    penalty: Res<Penalty>,
+    game_duration: Res<GameDuration>,
+) {
+    let time = game_duration.time.elapsed().as_millis() as f32 / 1000.0 + **penalty as f32;
+    let game_over_message = format!("Time: {:.2} s", time);
     commands
         .spawn((
             NodeBundle {
