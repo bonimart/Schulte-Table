@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use super::game::Score;
 
 use super::{
     despawn_screen,
@@ -20,8 +21,8 @@ struct OnGameOverScreen;
 #[derive(Resource, Deref, DerefMut)]
 struct GameOverTimer(Timer);
 
-fn game_over_setup(mut commands: Commands) {
-    // Display the logo
+fn game_over_setup(mut commands: Commands, score: Res<Score>) {
+    let game_over_message = format!("Game Over, Score: {}", score.to_string());
     commands
         .spawn((
             NodeBundle {
@@ -37,10 +38,9 @@ fn game_over_setup(mut commands: Commands) {
             OnGameOverScreen,
         ))
         .with_children(|parent| {
-            // Display the game name
             parent.spawn(
                 TextBundle::from_section(
-                    "Game Over, Score: ",
+                    game_over_message,
                     TextStyle {
                         font_size: 67.0,
                         color: COLOR_TEXT,
@@ -53,11 +53,9 @@ fn game_over_setup(mut commands: Commands) {
                 }),
             );
         });
-    // Insert the timer as a resource
     commands.insert_resource(GameOverTimer(Timer::from_seconds(2.0, TimerMode::Once)));
 }
 
-// Tick the timer, and change state when finished
 fn countdown(
     mut game_state: ResMut<NextState<GameState>>,
     time: Res<Time>,

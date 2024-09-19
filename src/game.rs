@@ -51,7 +51,7 @@ impl Default for NextExpected {
 }
 
 #[derive(Resource, Default, Deref, DerefMut)]
-struct Score(u8);
+pub struct Score(u8);
 
 fn game_setup(
     mut commands: Commands,
