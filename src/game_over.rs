@@ -4,6 +4,8 @@ use std::fs::File;
 use std::fs;
 use std::path;
 use std::io::Write;
+#[cfg(target_os = "android")]
+use android_activity::AndroidApp;
 
 use super::{
     despawn_screen,
@@ -13,7 +15,8 @@ use super::{
 
 pub fn game_over_plugin(app: &mut App) {
     app
-        .add_systems(OnEnter(GameState::GameOver), game_over_setup)
+        .init_resource::<Score>()
+        .add_systems(OnEnter(GameState::GameOver), (calculate_score, game_over_setup, save_score).chain())
         .add_systems(Update, countdown.run_if(in_state(GameState::GameOver)))
         .add_systems(OnExit(GameState::GameOver), despawn_screen::<OnGameOverScreen>);
 }
@@ -24,15 +27,27 @@ struct OnGameOverScreen;
 #[derive(Resource, Deref, DerefMut)]
 struct GameOverTimer(Timer);
 
-fn game_over_setup(
-    mut commands: Commands,
+#[derive(Resource, Default, Deref, DerefMut)]
+struct Score(f32);
+
+fn calculate_score(
+    mut score: ResMut<Score>,
     penalty: Res<Penalty>,
     game_duration: Res<GameDuration>,
-    config: Res<GameConfiguraiton>,
 ) {
     let time = game_duration.time.elapsed().as_millis() as f32 / 1000.0 + **penalty as f32;
-    let time_str = format!("{:.2} s", time);
-    let game_over_message = format!("Time: {}", time_str);
+    **score = time;
+}
+
+fn save_score(
+    score: Res<Score>,
+    config: Res<GameConfiguraiton>,
+) {
+    let time_str = format!("{:.2} s", **score);
+
+    #[cfg(target_os = "android")]
+    let score_dir = AndroidApp::internal_data_dir();
+
 
     let score_dir = path::Path::new(&config.score_file_path)
         .parent()
@@ -44,6 +59,13 @@ fn game_over_setup(
     write!(score_file, "{}\n", time_str)
         .expect("Unable to write score file");
 
+}
+
+fn game_over_setup(
+    mut commands: Commands,
+    score: Res<Score>,
+    config: Res<GameConfiguraiton>,
+) {
     commands
         .spawn((
             NodeBundle {
@@ -61,7 +83,7 @@ fn game_over_setup(
         .with_children(|parent| {
             parent.spawn(
                 TextBundle::from_section(
-                    game_over_message,
+                    format!("Time: {:.2} s", **score),
                     TextStyle {
                         font_size: 67.0,
                         color: config.color_text,
