@@ -2,10 +2,8 @@ use bevy::prelude::*;
 use super::game::{Penalty, GameDuration};
 use std::fs::File;
 use std::fs;
-use std::path;
 use std::io::Write;
-#[cfg(target_os = "android")]
-use android_activity::AndroidApp;
+use directories::ProjectDirs;
 
 use super::{
     despawn_screen,
@@ -43,22 +41,20 @@ fn save_score(
     score: Res<Score>,
     config: Res<GameConfiguraiton>,
 ) {
-    let time_str = format!("{:.2} s", **score);
-
-    #[cfg(target_os = "android")]
-    let score_dir = AndroidApp::internal_data_dir();
-
-
-    let score_dir = path::Path::new(&config.score_file_path)
-        .parent()
-        .expect("Unable to resolve score directory");
-    fs::create_dir_all(score_dir)
-        .expect("Unable to create score directory");
-    let mut score_file = File::options().append(true).create(true).open(&config.score_file_path)
-        .expect("Unable to open/create score file");
-    write!(score_file, "{}\n", time_str)
-        .expect("Unable to write score file");
-
+    if let Some(proj_dirs) = ProjectDirs::from("com", "example", "schulte_table") {
+        let time_str = format!("{:.2} s", **score);
+        let data_dir = proj_dirs.data_dir();
+        let file_path = data_dir.join(&config.score_file_path);
+        fs::create_dir_all(data_dir)
+            .expect("Unable to create score directory");
+        let mut score_file = File::options().append(true).create(true).open(file_path)
+            .expect("Unable to open/create score file");
+        write!(score_file, "{}\n", &time_str)
+            .expect("Unable to write score file");
+        println!("Score saved: {}", time_str);
+    } else {
+        println!("Unable to get project directories");
+    }
 }
 
 fn game_over_setup(
